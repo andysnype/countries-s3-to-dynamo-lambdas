@@ -7,12 +7,13 @@ Parameters:
   AppBucketName:
     Type: String
     Description: "REQUIRED: Unique S3 bucket name to use for the app."
+    Default: "countries-s3-delete"
 
 Resources:
-  S3JsonLoggerFunction:
+  CountriesToDeleteFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: src/handlers/s3-json-logger.s3JsonLoggerHandler
+      Handler: src/handlers/countries-to-delete.CountriesToDeleteHandler
       Runtime: nodejs16.x
       Architectures:
         - x86_64
@@ -32,6 +33,16 @@ Resources:
                 Rules:
                   - Name: suffix
                     Value: ".json"
+        S3NewCSVUploadedEvent:
+          Type: S3
+          Properties:
+            Bucket: !Ref AppBucket
+            Events: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: suffix
+                    Value: ".csv"
   AppBucket:
     Type: AWS::S3::Bucket
     Properties:
